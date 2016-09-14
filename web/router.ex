@@ -14,10 +14,16 @@ defmodule CodeCorps.Router do
     plug JaSerializer.Deserializer
   end
 
-  pipeline :with_token do
+  pipeline :verify_and_load_resource do
     plug Guardian.Plug.VerifyHeader, realm: "Bearer"
     plug Guardian.Plug.LoadResource
+  end
+
+  pipeline :ensure_authenticated do
     plug Guardian.Plug.EnsureAuthenticated
+  end
+
+  pipeline :current_user do
     plug CodeCorps.Plug.CurrentUser
   end
 
@@ -28,7 +34,8 @@ defmodule CodeCorps.Router do
   end
 
   scope "/", CodeCorps, host: "api." do
-    pipe_through :api
+    # pipe_through [:api, :verify_and_load_resource, :current_user]
+    pipe_through [:api, :verify_and_load_resource, :current_user]
 
     post "/login", AuthController, :create
 
@@ -64,7 +71,7 @@ defmodule CodeCorps.Router do
   end
 
   scope "/", CodeCorps, host: "api." do
-    pipe_through [:api, :with_token]
+    pipe_through [:api, :verify_and_load_resource, :ensure_authenticated, :current_user]
 
     delete "/logout", AuthController, :delete
 
