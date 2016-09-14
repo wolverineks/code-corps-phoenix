@@ -1,7 +1,6 @@
 defmodule CodeCorps.Plug.CurrentUser do
   @analytics Application.get_env(:code_corps, :analytics)
 
-  alias CodeCorps.Analytics
   alias CodeCorps.GuardianSerializer
 
   def init(opts), do: opts
