@@ -27,6 +27,10 @@ defmodule CodeCorps.Router do
     plug CodeCorps.Plug.CurrentUser
   end
 
+  pipeline :analytics_identify do
+    plug CodeCorps.Plug.AnalyticsIdentify
+  end
+
   scope "/", CodeCorps do
     pipe_through :browser # Use the default browser stack
 
@@ -34,7 +38,7 @@ defmodule CodeCorps.Router do
   end
 
   scope "/", CodeCorps, host: "api." do
-    pipe_through [:api, :bearer_auth, :current_user]
+    pipe_through [:api, :bearer_auth, :current_user, :analytics_identify]
 
     post "/login", AuthController, :create
 
@@ -70,7 +74,7 @@ defmodule CodeCorps.Router do
   end
 
   scope "/", CodeCorps, host: "api." do
-    pipe_through [:api, :bearer_auth, :ensure_auth, :current_user]
+    pipe_through [:api, :bearer_auth, :ensure_auth, :current_user, :analytics_identify]
 
     delete "/logout", AuthController, :delete
 
